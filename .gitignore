@@ -1,0 +1,10 @@
+node_modules
+dist
+.tmp
+.project
+.pydevproject
+.settings/
+.venv
+.env
+.tern-project
+*~

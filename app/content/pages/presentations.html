@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% set page.title = "Presentations" %}
+{% set page.nav = "presentations" %}
+
+{% block content %}
+{% for presentation in site.presentations %}
+	<article class="g--half {% if (loop.index % 2) == 0 %}g--last{% endif %}">
+		{% include "include/snippet.html" %}
+	</article>
+{% endfor %}
+{% endblock %}

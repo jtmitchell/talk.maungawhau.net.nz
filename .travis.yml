@@ -1,0 +1,31 @@
+sudo: false
+cache:
+  directories:
+    - node_modules
+branches:
+  only:
+  - master
+language: node_js
+node_js: stable
+install:
+- npm install -g npm
+- npm install -g gulp
+- npm install
+script:
+- gulp
+# deploy:
+  # provider: s3
+  # skip_cleanup: true
+  # bucket: talk.maungawhau.net.nz
+  # region: ap-southeast-1
+  # endpoint: www.maungawhau.net.nz.s3-website-ap-southeast-1.amazonaws.com
+  # acl: public_read
+  # local_dir: dist
+  # detect_encoding: true
+  # access_key_id:
+    # secure: IK5cC4HSeRjyC9hC21xVskq9G7NmpxADZMG3x7MW7/1aP7NcWGi8KpYM9t5kkTRpdPHaCZK/MKvG8ykDuvm3rS+VyE86g7otm7TaMoqbKlT4auGZws3zGPSOQHpBC2IrJxJWcIiM82WUg/VS3AiNMkDK8gTNMbP4pz5riIOyFhU=
+  # secret_access_key:
+    # secure: IdM7CRt/ehvc4oBvhTVWPlsXKSkk1LBqxhs8QXux9z5LLLthcoIIFT6KrUxXB5OAALLeBIThpgQ1MB7IVo6U2Gk9yQE2WvrfKHRPzDXxjmwabEXGkU+71CPf4/JxIwTOMBCXDIF3aZTi8jOQGRnf2lJqPJO8Rj1hwBLF7SZMMs8=
+# notifications:
+  # slack:
+    # secure: T+WFYFXx+dH1k95jqBT2jFj5AzZDbNs3/k/K5L226zvGG5ia44CJa7sUk12Liew3z3QWFdeXoaUdmpwYRQu5i1IZQeo/OMoicnKSleMfuETwpEqbsI+dZwcc5T4AJZpN6DnRvOOhaV4ciAIm30Ooo5lGAb9WIFVrPpqZ0pE9Dvg=

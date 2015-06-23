@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set page.nav = "home" %}
+
+{% block content %}
+<h2>Recent presentations</h2>
+<div class="blog_excerpt">
+{% set counter = 0 %}
+{% for presentation in site.presentations %}
+	{% if loop.index <= 6 %}{% set counter = counter + 1 %}
+	<article class="g--third {% if (counter % 3) == 0 %}g--last{% endif %}">
+		{% include "include/snippet.html" %}
+	</article>
+	{% endif %}
+{% endfor %}
+</div>
+</section>
+
+{% endblock main %}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<title>{{site.title}}</title>
+	<link href="{{site.url}}/rss.xml" rel="self"/>
+	<link href="{{site.url}}/"/>
+	<updated>{{site.time|date('c')}}</updated>
+	<id>{{site.url}}/</id>
+	<author>
+		<name>{{site.author}}</name>
+		<email>{{site.email}}</email>
+	</author>
+	{% for presentation in site.presentations %}{% if loop.index < 11 %}<entry>
+		<title>{{presentation.title}}</title>
+		<link href="{{site.url}}/{{presentation.url}}"/>
+		<updated>{{presentation.created|date('c')}}</updated>
+		<id>{{site.url}}/{{presentation.url}}</id>
+		<content type="html">{{presentation.content|escape('xml')}}</content>
+	</entry>{% endif %}{% endfor %}
+</feed>

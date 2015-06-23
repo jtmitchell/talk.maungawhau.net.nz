@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content -%}
+<article class="presentation">
+	<header>
+{% if page.description %}
+    <em>{{page.description}}</em>
+{% endif %}
+{% if page.client %}
+		<p class="large">Client: {{page.client}}, 
+			<span class="medium">
+			{{page.start}}{% if page.end %} to {{page.end}}{% endif %}
+			</span>
+		</p>
+{% else %}
+        <p class="published">By {% if page.author %}{{page.author}}{% else %}{{site.author}}{% endif %}
+                             on {{page.created|date('M j, Y')}}<br/>
+{% endif %}
+        <span class="small">{% if page.tags %}Tags: {% endif %}
+            {% for tag in page.tags %}
+                <a href="/tag/{{tag}}.html">{{tag}}</a>{% if not loop.last %} / {% endif %}
+            {% endfor %}
+        </span>
+    </p>
+
+{% if page.share %}
+<span class="social-share">
+<ul>
+    <li><a href="https://www.facebook.com/sharer/sharer.php?u={{site.url}}/{{page.url}}" title="Share on Facebook" target="_blank"><i class="fa fa-facebook"></i></a></li>
+    <li><a href="http://www.linkedin.com/shareArticle?mini=true&url={{site.url}}/{{page.url}}&title=&summary={{page.description}}" title="Share on LinkedIn" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+    <li><a href="http://twitter.com/intent/tweet?via={{site.twitter}}&url={{site.url}}/{{page.url}}&text={{page.description}}" title="Share on Twitter" target="_blank"><i class="fa fa-twitter"></i></a></li>
+    <li><a href="https://plus.google.com/share?url={{site.url}}/{{page.url}}" title="Share on Google+" target="_blank"><i class="fa fa-google-plus"></i></a></li>
+</ul>
+</span>
+{% endif %}
+    </header>
+	{{content|safe}}
+</article>
+
+{% if page.comments %}
+<h3 class="line-divide large">Comments</h3>
+<div class="g-comments"
+    data-href="{{site.url}}/{{page.url}}"
+    data-first_party_property="BLOGGER"
+    data-view_type="FILTERED_POSTMOD">
+</div>
+{% endif %}
+{%- endblock %}
+
+{% block javascript %}
+{% if page.comments %}
+<script src="https://apis.google.com/js/plusone.js"></script>
+{% endif %}
+{% endblock %}

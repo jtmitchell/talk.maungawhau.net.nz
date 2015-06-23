@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="">
+  <head>
+    <title>{% if page.title %}{{page.title}} - {% endif %}{{site.title}}</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="author" content="{{site.author}}">
+    {% if site.twitter %}<link rel="me" href="https://twitter.com/{{site.twitter}}">{% endif %}
+    <meta name="description" content="{{page.description}}">
+{% if site.google_verify %}
+    <meta name="google-site-verification" content="{{ site.google_verify }}">
+{% endif %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Add to homescreen -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Fallback to homescreen for Chrome <39 on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="{{site.title}}">
+    <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="{{site.title}}">
+    <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+
+    <!-- Tile icon for Win8 (144x144 + tile color) -->
+    <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileColor" content="#3372DF">
+
+    <meta name="theme-color" content="#3372DF">
+
+    <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
+    <!--
+    <link rel="canonical" href="http://www.example.com/">
+    -->
+    
+	<!-- RSS -->
+	<link rel="alternate" type="application/rss+xml" title="{{site.title}} Posts" href="{{site.url}}/rss.xml" />
+	
+    <!-- Page styles -->
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body class="{{page.nav}}">
+
+	
+    <header class="app-bar promote-layer">
+      <div class="app-bar-container">
+        <button class="menu"><img src="/images/hamburger.svg" alt="Menu"></button>
+        
+        <h1 class="logo"><a href="/"><img src="/images/logo.svg">{{site.title}}</a></h1>
+        <section class="app-bar-actions">
+        <!-- Put App Bar Buttons Here -->
+        <!-- e.g <button><i class="icon icon-star"></i></button> -->
+        {% block app-bar-actions %}
+        {% endblock %}
+\        </section>
+      </div>
+    </header>
+
+    <nav class="navdrawer-container promote-layer">
+      <h4>Navigation</h4>
+      <ul>
+        <li {% if page.nav == "home"%}class="active"{% endif%}>
+        	<a href="{{site.urlRoot}}">Home</a>
+    	</li>
+        <li {% if page.nav == "presentations"%}class="active"{% endif%}>
+        	<a href="{{site.urlRoot}}presentations.html">Presentations</a>
+    	</li>
+      </ul>
+    </nav>
+
+	<div class="clear"></div>
+    <main>
+				
+		{% block main %}
+		<section class="container">
+			<h2>{{page.title|title}}</h2>
+			<div>{% block content %}{% endblock %}</div>
+		</section> 
+		{% endblock %}
+				
+		<div class="clear"></div>
+		<footer class="centre small">
+			<p>&copy; Copyright 2014-{{site.time|date('Y')}} Maungawhau Information Technology Ltd. All rights reserved.</p>
+		</footer>
+    </main>
+
+    <!-- build:js scripts/main.min.js -->
+    <script src="/scripts/main.js"></script>
+    {% block javascript %}{% endblock %}
+    <!-- endbuild -->
+
+{% if site.analytics_id %}
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', '{{site.analytics_id}}', 'auto');
+      ga('send', 'pageview');
+    </script>
+{% endif %}
+    <!-- Built with love using Web Starter Kit -->
+  </body>
+</html>

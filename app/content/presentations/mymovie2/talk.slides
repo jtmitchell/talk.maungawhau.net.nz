@@ -1,0 +1,1182 @@
+---
+title: MyMovie API
+description: Writing the API service for MyMovie
+author: James Mitchell
+---
+<!--
+<section>
+    <div data-markdown>
+    </div>
+    <pre><code class="python" data-trim>
+    </code></pre>
+    <aside class="notes" data-markdown>
+    </aside>
+</section>
+
+<section>
+    <h2></h2>
+    <p>
+    </p>
+    <aside class="notes" data-markdown>
+    </aside>
+</section>
+-->
+<section id="title">
+    <h1>MyMovie</h1>
+    <p><emphasis>Tracking movies so you don't have to.</emphasis></p>
+    <p>
+            <a href="http://www.maungawhau.net.nz/">James Mitchell</a>
+    </p>
+    <span class="social-share">
+        <ul>
+            <li><a href="https://plus.google.com/+JamesMitchell" target="_blank"><i class="fa fa-google-plus"></i></a></li>
+            <li><a href="https://twitter.com/saywibble" target="_blank"><i class="fa fa-twitter"></i></a></li>
+            <li><a href="https://nz.linkedin.com/pub/james-mitchell/4/832/8b5" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+        </ul>
+    </span>
+</section>
+
+<section id="intro">
+    <section>
+        <h2>Introduction</h2>
+        <p>A series of talks covering the &ldquo;life cycle&rdquo; of a project.</p>
+        <aside class="notes" data-markdown>
+            * Previously on MyMovie...
+            * Talk 1
+             * Planning the project
+             * setup
+            * execution
+            * profit (or failure...)
+        </aside>
+    </section>
+
+    <section>
+        <h2>Talk 2</h2>
+        <p>
+            <q cite="http://en.wikipedia.org/wiki/Casablanca_(film)">
+                &ldquo;Show me the money!&rdquo;
+            </q>
+        </p>
+        <p>Writing the server-side code.</p>
+        <ul>
+            <li>Database</li>
+                <ul class="fragment" >
+                    <li>Setup a User model and (social) authentication</li>
+                    <li>Write the Movie models</li>
+                </ul>
+            <li>API</li>
+                <ul class="fragment" >
+                    <li>Document the API</li>
+                    <li>Write views and serialisers</li>
+                </ul>
+         </ul>
+        <aside class="notes" data-markdown>
+            * ~~Custom~~ user model
+             * hurray for tests
+            * python social auth package
+            * API docs at apiary.io
+            * nested routes drf-nested-routers
+        </aside>
+    </section>
+</section>
+
+<section id="setup">
+    <section>
+        <h2>Greenfields Development</h2>
+        <img src="images/greenfields.jpg" alt="Greenfield development" />
+        <aside class="notes" data-markdown>
+            * beautiful beginnings
+        </aside>
+    </section>
+    <section>
+        <h2>Barebones Django</h2>
+        <p>Install a virtualenv with django.
+        </p>
+        <pre class="fragment"><code>
+$ mkvirtualenv mymovie-server
+$ pip install django
+$ django-admin startproject mymovie
+    </code></pre>
+    <aside class="notes" data-markdown>
+    </aside>
+</section>
+<section>
+    <h2>Dependancies</h2>
+    <p>Add a requirements.txt with the project dependancies, and
+    </p>
+    <pre><code>$ pip install -r requirements.txt</code></pre>
+    <pre class="fragment"><code data-trim>
+PyMySQL==0.6.6                  # Python3 compatible library
+psycopg2==2.6                   # add Postgresql for Heroku
+Django==1.8.2
+djangorestframework==3.1.2      # for API
+djangorestframework-jwt==1.2.0  # for API authentication
+drf-nested-routers==0.9.0
+jsonfield==1.0.3                # for ease of use
+django-filter==0.10.0
+
+python-social-auth==0.2.10      # social authentication
+
+Pillow==2.8.1
+django-resized==0.3.5
+sorl-thumbnail==12.2
+
+django-redis==4.0.0
+hiredis==0.2.0
+
+django-compressor==1.5
+
+# for serving the site in most places
+waitress==0.8.9
+whitenoise==1.0.6
+dj-database-url==0.3.0
+    </code></pre>
+    <aside class="notes" data-markdown>
+        * actually using the Two Scoops of Django structure
+         * requirements/base.txt
+         * requirements/develop.txt
+    </aside>
+</section>
+<section>
+    <h2>Djano Settings</h2>
+    <ul>
+        <li>Changed the entry module from &ldquo;mymovie&rdquo; to  &ldquo;app&rdquo;</li>
+        <li>Refactored settings.py into settings/base.py, settings/test.py, etc</li>
+        <li>Pickup sensitive settings from the environment</li>
+    </ul>
+    <pre><code class="python" data-trim>
+# settings.development
+from .base import *
+
+DEBUG = True
+TEMPLATE_DEBUG = True
+INSTALLED_APPS += ("debug_toolbar",)
+INTERNAL_IPS = ("127.0.0.1",)
+MIDDLEWARE_CLASSES += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
+ALLOWED_HOSTS = ['*']
+    </code></pre>
+    <aside class="notes" data-markdown>
+        * Two Scoops of Django again
+        * easy to see what is special about this settings
+         * inherits from the base/production
+         * production just turns off debug
+        * tests settings disables cache and password hashing
+    </aside>
+</section>
+<section>
+    <div data-markdown>
+    ## Snippet of settings.base
+
+    We define a helper function to get environment settings,
+    and throw an exception if it isn't defined.
+
+</div>
+    <pre><code class="python" data-trim>
+# settings.base snippet
+def get_env_variable(var_name, default=None):
+    """
+    Get the environment variable or return the default if provided
+    or raise an exception
+    """
+    try:
+        if os.environ[var_name] in ('true', 'false'):
+            return bool(strtobool(os.environ[var_name]))
+        return os.environ[var_name]
+    except KeyError:
+        if default is not None:
+            return default
+        error_msg = "Set the %s environment variable" % var_name
+        raise ImproperlyConfigured(error_msg)
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mymovie',
+        'USER': get_env_variable('DB_USER', ''),
+        'PASSWORD': get_env_variable('DB_PASSWORD', ''),
+        'HOST': get_env_variable('DB_HOST', ''),
+        'PORT': get_env_variable('DB_PORT', ''),
+        'OPTIONS': {'init_command': 'SET storage_engine=INNODB;'},
+    }
+}
+
+# Use the STATIC_HOST env to setup CDN hosting
+# http://whitenoise.evans.io/en/latest/django.html#instructions-for-amazon-cloudfront
+STATIC_URL = get_env_variable('DJANGO_STATIC_HOST', '') + '/static/'
+MEDIA_URL = '/media/'
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        # requests handled by django
+        'django.requests': {
+            'handlers': ['console'],
+            'level': get_env_variable('DJANGO_LOG_LEVEL', 'ERROR'),
+        }
+    }
+}
+    </code></pre>
+    <aside class="notes" data-markdown>
+        * Env is 12 Factor App
+        * logging to stdout
+        * whitenoise allows serving static content from the app
+         * actually it is the wsgi, not django
+         * supports CDN
+    </aside>
+</section>
+<section>
+    <div data-markdown>
+        ## Project files so far
+    </div>
+    <pre><code>
+.
+├── app
+│   ├── __init__.py
+│   ├── settings
+│   │   ├── base.py
+│   │   ├── development.py
+│   │   ├── __init__.py
+│   │   ├── production.py
+│   │   └── test.py
+│   ├── static
+│   │   └── app
+│   │       ├── favicon.png
+│   │       └── robots.txt
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── test_static.py
+│   │   └── test_validate.py
+│   ├── urls.py
+│   └── wsgi.py
+├── LICENSE
+├── manage.py
+├── Procfile.dev
+├── README.md
+├── requirements
+│   ├── base.txt
+│   ├── develop.txt
+│   ├── production.txt
+│   └── test.txt
+└── requirements.txt
+      </code>
+      </pre>
+      <aside class="notes" data-markdown>
+          * Test coverage is 80%
+      </aside>
+  </section>
+</section>
+
+<section id="authentication">
+  <section>
+      <div data-markdown>
+          ## User Authentication
+
+          * Support Admin login with username/password
+           - django.contrib.auth
+          * Client UI will perform &ldquo;social authentication&rdquo;
+           - python-social-auth
+          * API will authenticate with json web tokens (JWT)
+           - djangorestframework-jwt
+      </div>
+      <aside class="notes" data-markdown>
+          * originally used a custom user model without username
+           * social-auth relies on username
+           * refactor and re-run tests until everything passes again
+          * JWT is like session cookies, plus timeouts
+           * and coverage decreases to 70%
+          * tests fail for 2.7, ok for 3.4
+              * when connecting social-auth and jwt steps
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## Admin pages
+
+          Authentication for django admin using username+password login.
+      </div>
+      <img src="images/admin-flow.png" />
+      <aside class="notes" data-markdown>
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## Social authentication
+
+          Token, token, who has the token?
+      </div>
+      <img src="images/social-flow.png" />
+      <aside class="notes" data-markdown>
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## API authentication
+
+          The JWT is passed as an HTTP Header in the request.
+      </div>
+      <img src="images/api-flow.png" />
+      <aside class="notes" data-markdown>
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## Does it work?
+
+          What do the unit tests look like?
+      </div>
+      <pre class="fragment"><code data-trim>
+# -*- coding: utf-8 -*-
+from calendar import timegm
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from mock import patch
+from rest_framework import status
+from rest_framework.test import APIClient
+from rest_framework_jwt import utils
+from .factories import UserFactory
+
+class TokenTestCase(TestCase):
+    """Methods from the JWT tests to work with tokens."""
+    def create_token(self, user, exp=None, orig_iat=None):
+        payload = utils.jwt_payload_handler(user)
+        if exp:
+            payload['exp'] = exp
+        if orig_iat:
+            payload['orig_iat'] = timegm(orig_iat.utctimetuple())
+        token = utils.jwt_encode_handler(payload)
+        return token
+
+class TestUserApi(TokenTestCase):
+    """Test the API calls."""
+    def setUp(self):
+        self.client = APIClient(enforce_csrf_checks=True)
+
+    def test_login(self):
+        """Test the login endpoint"""
+        user = get_user_model().objects.create_user(
+            username='testuser',
+            email='testuser@test.domain.com',
+            password='password',
+            )
+        data = dict(
+            username=user.username,
+            email=user.email,
+            password='password',
+            )
+        response = self.client.post(
+            '/api/v1/auth/login',
+            data=data,
+            format='json',
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK,
+                         'Got error: {}'.format(response.content))
+        decoded_payload = utils.jwt_decode_handler(response.data['token'])
+        self.assertEqual(decoded_payload['username'], user.username)
+        self.assertEqual(decoded_payload['email'], user.email)
+        self.assertEqual(decoded_payload['user_id'], user.pk)
+
+    def test_get_info(self):
+        """Call the get info endpoint"""
+        user = UserFactory.create()  # suppress @UndefinedVariable
+        auth = 'JWT {}'.format(self.create_token(user))
+        response = self.client.get(
+            '/api/v1/users/me',
+            HTTP_AUTHORIZATION=auth,
+            format='json',
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK,
+                         'Got error: {}'.format(response.content))
+        self.assertEqual(response.data['email'], user.email)
+        self.assertEqual(response.data['id'], user.pk)
+        self.assertEqual(response.data['first_name'], user.first_name)
+        self.assertEqual(response.data['last_name'], user.last_name)
+        self.assertEqual(response.data['full_name'], user.get_full_name())
+        self.assertEqual(response.data['avatar'], user.profile.avatar_url)
+
+gplus_user_data = {...mock data...}
+
+class TestSocialAuth(TestCase):
+    """Test that the user is registered if we get a social access token."""
+    backend = 'google-plus'
+    access_token = 'sample.token'
+
+    def setUp(self):
+        self.client = APIClient(enforce_csrf_checks=True)
+
+    @patch('social.backends.base.BaseAuth.get_json')
+    def test_gplus_auth(self, mock):
+        """Exchange access token for JWT"""
+        mock.return_value = gplus_user_data
+
+        response = self.client.get(
+            '/api/v1/auth/register-by-token/{}'.format(self.backend),
+            params=dict(
+                access_token=self.access_token
+                ),
+            format='json',
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK,
+                         'Got error: {}'.format(response.content))
+        self.assertIn('token', response.data, 'Missing JWT')
+        self.assertIn('user', response.data, 'Missing User')
+        </code></pre>
+        <aside class="notes" data-markdown>
+            * create our own token
+            * add tokens in the HTTP request headers
+            * given a gplus user dict, create the user and return JWT
+            * coverage is 70%
+        </aside>
+    </section>
+</section>
+
+<section id="database">
+    <section>
+        <div data-markdown>
+            ## Movie Models
+
+            All the documentation you really need...
+        </div>
+        <img height="500px" src="images/mymovie-db-entities.jpg" alt="DB Model" />
+        <aside class="notes" data-markdown>
+        </aside>
+    </section>
+    <section>
+        <div data-markdown>
+            ## ...and what was built
+        </div>
+        <pre><code data-trim>
+# -*- coding: utf-8 -*-
+import datetime
+from django.conf import settings
+from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
+from jsonfield import JSONField
+from movies.service import omdb
+
+SERVICE_OMDB = 'omdb'
+SERVICE_CHOICES = (
+    (SERVICE_OMDB, 'Open Movie Database'),
+    )
+
+class MovieManager(models.Manager):
+    def lookup(self, name=None, service=SERVICE_OMDB, service_id=None):
+        """
+        Lookup a movie.
+        If we don't have it already, retrieve data from the service.
+        """
+        movie = None
+        qs = self.filter(
+            servicemovie__service=service,
+            servicemovie__service_id=service_id)
+
+        if qs.exists():
+            return qs[0]
+        else:
+            movie_data = omdb.get(service_id=service_id)
+
+            if movie_data:
+                movie, _ = self.get_or_create(
+                    name=movie_data.get('Title', name),
+                    year=movie_data.get('Year'),
+                    poster=movie_data.get('Poster'),
+                    )
+
+                service, _ = ServiceMovie.objects.get_or_create(
+                    movie=movie,
+                    service=service,
+                    service_id=service_id,
+                    )
+                service.service_data = movie_data
+                service.updated = datetime.date.today()
+                service.save()
+
+        return movie
+
+@python_2_unicode_compatible
+class Movie(models.Model):
+    """Minimal amount of data for a Movie."""
+    name = models.CharField(max_length=255, db_index=True)
+    poster = models.URLField(max_length=255, blank=True, null=True)
+    year = models.CharField(
+        max_length=20,
+        verbose_name='Year of Release',
+        db_index=True, blank=True, null=True)
+    subscribers = models.ManyToManyField(settings.AUTH_USER_MODEL,
+                                         through='Watchlist')
+
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return '{0}'.format(self.name)
+
+@python_2_unicode_compatible
+class ServiceMovie(models.Model):
+    """Link between a movie and a remote service with more information."""
+    movie = models.ForeignKey(Movie)
+    service_id = models.CharField(max_length=50, db_index=True)
+    service = models.CharField(max_length=10, db_index=True,
+                               choices=SERVICE_CHOICES, default=SERVICE_OMDB)
+    service_data = JSONField(null=True, blank=True)
+    updated = models.DateField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        unique_together = ('service_id', 'service')
+
+    def __str__(self):
+        return '{0}'.format(self.movie.name)
+
+@python_2_unicode_compatible
+class Watchlist(models.Model):
+    """
+    Link between a movie and a user.
+    The Notifications requested are linked to this model.
+    """
+    movie = models.ForeignKey(Movie)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+
+    def __str__(self):
+        return '{0}/{1}'.format(self.movie.name, self.user.get_full_name())
+
+NOTIFY_CINEMA = 0
+NOTIFY_RETAIL = 1
+NOTIFY_RENTAL = 2
+NOTIFY_STREAMING = 3
+
+NOTIFICATION_CHOICES = (
+    (NOTIFY_CINEMA, 'Cinema'),
+    (NOTIFY_RETAIL, 'Retail Purchase'),
+    (NOTIFY_RENTAL, 'Rental'),
+    (NOTIFY_STREAMING, 'Online Streaming'),
+    )
+
+@python_2_unicode_compatible
+class Notification(models.Model):
+    """
+    A list of the notifications a user has requested.
+    """
+    watchlist = models.ForeignKey(Watchlist)
+    notified = models.BooleanField(default=False)
+    notified_date = models.DateField(
+        null=True, blank=True,
+        help_text='Date when the notification was sent',
+        )
+    type = models.IntegerField(
+        db_index=True,
+        choices=NOTIFICATION_CHOICES, default=NOTIFY_CINEMA,
+        help_text='Send notification when movie is available for ...'
+        )
+
+    class Meta:
+        ordering = ('watchlist', 'type')
+        unique_together = ('watchlist', 'type')
+
+    def __str__(self):
+        return '{0}/{1}/{2}/{3}'.format(
+            self.get_type_display(),
+            'Y' if self.notified else 'N',
+            self.watchlist.movie.name,
+            self.watchlist.user.get_full_name(),
+            )
+      </code></pre>
+      <aside class="notes" data-markdown>
+          * Python3/2 decorator for models naming themselves
+          * user has a post-save signal for the profile
+          * constants instead of related tables for service and notification types
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## OMDB lookup service
+      </div>
+      <pre><code data-trim>
+# -*- coding: utf-8 -*-
+import requests
+APIHOST = 'http://www.omdbapi.com/'
+
+def get(name=None, service_id=None):
+    params = dict(type='movie',
+                  r='json')
+    if name:
+        params.update(dict(s=name))
+    if id:
+        params.update(dict(i=service_id, tomatoes=True))
+
+    response = requests.get(APIHOST, params=params)
+
+    data = response.json()
+    if 'Error' in data and data.get('Response') == 'False':
+        raise Exception(data.get('Error'))
+    if response.ok:
+        return data
+    else:
+        return None
+        </code></pre>
+        <aside class="notes" data-markdown>
+            * probably the most important function in the app
+            * TESTS REBOUND TO 75% !!!
+        </aside>
+    </section>
+</section>
+
+<section id="api-docs">
+    <div data-markdown>
+        ## API Documentation
+
+        Visit http://docs.mymovie1.apiary.io/ and have a play.
+
+    </div>
+    <img height="500px" src="images/apiaryio.png" alt="apiary.io" />
+    <aside class="notes" data-markdown>
+        * I got nothing here...
+        * had to make heroku instance so the endpoint went somewhere
+         * free tier services PG, logs
+         * custom DNS redirection CNAME to mymovie-api.herokuapp.com
+        * apiary.io
+        * postman for flinging stuff at the wall
+        * mock and real api calls
+        * DRF browser
+         * http://mymovie-api.maungawhau.net.nz/api/v1/config
+    </aside>
+</section>
+
+<section id="api">
+    <section>
+        <div data-markdown>
+            ## Django Rest Framework
+
+            * Adds content negotiation to the Request/Response flow
+            * Serialization to and from the Django models
+            * Default endpoints for GET/POST/PUT
+             - hooks and decorators to roll-your-own
+            * Builtin API explorer
+        </div>
+        <aside class="notes" data-markdown>
+            * tastypie, restless
+            * negotiation is auto-magic
+        </aside>
+    </section>
+    <section>
+        <div data-markdown>
+            ## Model Serialization
+
+            The process of converting the stored data into and out of the transport format, ie JSON or XML
+        </div>
+        <pre><code data-trim>
+# -*- coding: utf-8 -*-
+from rest_framework import serializers
+from .models import Movie, Watchlist, Notification, ServiceMovie
+from users.serializers import UserSerializer
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceMovie
+        fields = ('id', 'service', 'service_id', 'updated', 'service_data')
+
+class MovieSerializer(serializers.ModelSerializer):
+    services = ServiceSerializer(many=True, source='servicemovie_set')
+
+    class Meta:
+        model = Movie
+        fields = ('id', 'name', 'poster', 'year', 'services')
+      </code></pre>
+      <aside class="notes" data-markdown>
+          * provides a simple wrapper around the model for CRUD
+          * need to add in related models
+          * choose between keys are ID or URL
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## Model Serialization
+
+          ... gives a JSON response like this...
+      </div>
+      <pre><code class="json" data-trim>
+{
+    "id": 1,
+    "name": "Movie 0",
+    "poster": "http://www.kautzer.net/",
+    "year": "2015",
+    "services": [
+        {
+            "id": 1,
+            "service": "omdb",
+            "service_id": "8651",
+            "updated": "2015-05-07",
+            "service_data": "{'jsonfield': 'Sample data'}"
+        }
+    ]
+}
+      </code></pre>
+      <aside class="notes" data-markdown>
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## Watchlist Serializer
+
+          And now for somethiing completely different.
+      </div>
+      <pre><code data-trim>
+class WatchlistSerializer(serializers.ModelSerializer):
+    user = UserSerializer(write_only=True, required=False)
+    movie = MovieSerializer(read_only=True)
+    notifications = NotificationSerializer(
+        read_only=True,
+        many=True,
+        source='notification_set')
+
+    # fields used when creating a new watchlist
+    moviename = serializers.CharField(write_only=True)
+    notifywhen = serializers.ListField(write_only=True)
+    service = serializers.CharField(write_only=True)
+    service_id = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Watchlist
+
+    def create(self, validated_data):
+        """
+        Save the new watchlist and associated notifications and movies.
+        """
+        ModelClass = self.Meta.model
+
+        moviename = validated_data.pop('moviename')
+        notifywhen = validated_data.pop('notifywhen')
+        service = validated_data.pop('service')
+        service_id = validated_data.pop('service_id')
+
+        movie = Movie.objects.lookup(name=moviename,
+                                     service=service,
+                                     service_id=service_id,
+                                     )
+
+        validated_data.update(dict(movie=movie))
+
+        try:
+            instance = ModelClass.objects.create(**validated_data)
+        except TypeError as exc:
+            msg = (
+                'Got a `TypeError` when calling `%s.objects.create()`. '
+                'This may be because you have a writable field on the '
+                'serializer class that is not a valid argument to '
+                '`%s.objects.create()`. You may need to make the field '
+                'read-only, or override the %s.create() method to handle '
+                'this correctly.\nOriginal exception text was: %s.' %
+                (
+                    ModelClass.__name__,
+                    ModelClass.__name__,
+                    self.__class__.__name__,
+                    exc
+                )
+            )
+            raise TypeError(msg)
+
+        for notify_type in notifywhen:
+            Notification.objects.create(watchlist=instance, type=notify_type)
+
+        return instance
+      </code></pre>
+      <aside class="notes" data-markdown>
+          * create() is taken from DRF base class
+           * get the movie
+           * create the watchlist
+           * create the notifications
+          * user is required, and added in the view
+          * write-only fields for POST new watchlist
+          * the returned JSON includes the detail for all linked tables
+      </aside>
+  </section>
+  <section>
+      <h2>Create a Watchlist</h2>
+      <p>When you POST</p>
+      <pre><code class="json" data-trim>
+{
+    "moviename": "Star Trek",
+    "service": "omdb",
+    "service_id": "tt0796366",
+    "notifywhen":  [ "0", "1" ]
+}
+      </code></pre>
+
+      <p class="fragment" data-fragment-index="1">You get</p>
+      <pre class="fragment" data-fragment-index="1"><code class="json" data-trim>
+{
+    "id": 3,
+    "movie": {
+        "id": 4,
+        "name": "Star Trek",
+        "poster": "http://ia.media-imdb.com/images/M/MV5BMjE5NDQ5OTE4Ml5BMl5BanBnXkFtZTcwOTE3NDIzMw@@._V1_SX300.jpg",
+        "year": "2009",
+        "services": [
+            {
+                "id": 4,
+                "service": "omdb",
+                "service_id": "tt0796366",
+                "updated": "2015-06-17",
+                "service_data": "some stuff goes here"
+            }
+        ]
+    },
+    "notifications": [
+        {
+            "id": 4,
+            "notified": false,
+            "notified_date": null,
+            "type": 0,
+            "watchlist": 3
+        },
+        {
+            "id": 5,
+            "notified": false,
+            "notified_date": null,
+            "type": 1,
+            "watchlist": 3
+        }
+    ]
+}
+      </code></pre>
+      <aside class="notes" data-markdown>
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## Views
+
+          The view handles the incoming request.
+          It relies on the serializer to validate data, and provide a safe representation to send over the wire.
+      </div>
+      <pre><code data-trim>
+# -*- coding: utf-8 -*-
+from rest_framework import viewsets
+from custom_rest_framework.viewsets import JWTViewSet
+from .models import Movie, Watchlist, Notification
+from .serializers import MovieSerializer, \
+    WatchlistSerializer, \
+    NotificationSerializer
+
+class MovieViewSet(JWTViewSet, viewsets.ModelViewSet):
+    serializer_class = MovieSerializer
+    queryset = Movie.objects.all()
+
+class WatchlistViewSet(JWTViewSet, viewsets.ModelViewSet):
+    serializer_class = WatchlistSerializer
+
+    def get_queryset(self):
+        """Filter based on the auth user"""
+        user = self.request.user
+        return Watchlist.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        """Ensure we save the request user with the model"""
+        serializer.save(user=self.request.user)
+
+class NotificationViewSet(JWTViewSet, viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        """Filter based on the auth user"""
+        user = self.request.user
+        return Notification.objects.filter(watchlist__user=user)
+      </code></pre>
+      <aside class="notes" data-markdown>
+          * DRF ModelViewSet combines mixin classes for CRUD
+          * JWTViewSet is my helper for token expiry
+          * override get_queryset() to force filtering by user
+          * perform_create() adds the authenticated user to the model data
+      </aside>
+  </section>
+  <section>
+      <div data-markdown>
+          ## URL Routes / REST Endpoints
+
+          Finally the views are connected to the Django URL configuration.
+      </div>
+      <pre><code class="python" data-trim>
+# -*- coding: utf-8 -*-
+from django.conf.urls import patterns, include, url
+from rest_framework_nested.routers import SimpleRouter, NestedSimpleRouter
+
+from .views import MovieViewSet, WatchlistViewSet, NotificationViewSet
+
+router = SimpleRouter(trailing_slash=False)
+router.include_format_suffixes = False
+router.register(r'v1/movies', MovieViewSet, base_name='movie')
+router.register(r'v1/watchlists', WatchlistViewSet, base_name='watchlist')
+
+# register the nested urls for movie routes
+wl_router = NestedSimpleRouter(router, r'v1/watchlists',
+                               lookup='watchlist', trailing_slash=False)
+wl_router.register(r'notifications', NotificationViewSet,
+                   base_name='notification')
+
+urlpatterns = patterns('',
+                       url(r'', include(router.urls, namespace='movie')),
+                       url(r'', include(wl_router.urls, namespace='movie')),
+                       )
+
+        </code></pre>
+        <aside class="notes" data-markdown>
+            * trailing_slash=False for Angular happiness
+            * nested routes to allow
+             - /api/v1/watchlists/:id/notifications/:id2
+        </aside>
+    </section>
+</section>
+
+<section id="tests">
+    <section>
+        <div data-markdown>
+            ## Tests
+
+            After all that work I am rewarded with
+        </div>
+        <img height="500px" src="images/testcoverage-67.png" class="fragment" alt="Coverage 67%" />
+        <aside class="notes" data-markdown>
+            * started at 80%
+            * then I wrote some code... stupid, stupid :)
+            * look at the report
+             * https://coveralls.io/builds/2791756
+             * https://coveralls.io/builds/2791756/source?filename=utils%2Factions.py
+        </aside>
+    </section>
+    <section>
+        <div data-markdown>
+            ## So let's write some Unit Tests
+
+            Unit tests check the functionality of a small unit of the code.
+        </div>
+        <pre><code class="python" data-trim>
+class TestMovieApi(TokenTestCase):
+    """Test the API calls."""
+    def setUp(self):
+        self.client = APIClient(enforce_csrf_checks=True)
+        self.user = UserFactory.create()  # suppress @UndefinedVariable
+        self.auth = 'JWT {}'.format(self.create_token(self.user))
+
+    def test_get_movie(self):
+        movie = MovieFactory.create()  # suppress @UndefinedVariable
+        response = self.client.get(
+            '/api/v1/movies/{}'.format(movie.pk),
+            HTTP_AUTHORIZATION=self.auth,
+            format='json',
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK,
+                         'Got error: {}'.format(response.content))
+        self.assertEqual(response.data['id'], movie.pk)
+
+    def test_get_watchlist_wrong_user(self):
+        watchlist = WatchlistFactory.create()  # suppress @UndefinedVariable
+        response = self.client.get(
+            '/api/v1/watchlists/{}'.format(watchlist.pk),
+            HTTP_AUTHORIZATION=self.auth,
+            format='json',
+            )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
+                         'Got error: {}'.format(response.content))
+
+    def test_get_watchlist(self):
+        watchlist = WatchlistWithNotificationsFactory.create()  # suppress @UndefinedVariable
+        response = self.client.get(
+            '/api/v1/watchlists/{}'.format(watchlist.pk),
+            HTTP_AUTHORIZATION='JWT {}'.format(
+                self.create_token(watchlist.user)
+                ),
+            format='json',
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK,
+                         'Got error: {}'.format(response.content))
+        self.assertEqual(response.data['id'], watchlist.pk)
+
+    def test_create_watchlist(self):
+        """Create a new watchlist"""
+        data = dict(
+            moviename="Star Trek",
+            service=SERVICE_OMDB,
+            service_id='tt0796366',
+            notifywhen=[NOTIFY_CINEMA, NOTIFY_RENTAL, NOTIFY_STREAMING],
+            )
+        response = self.client.post(
+            '/api/v1/watchlists',
+            data=data,
+            HTTP_AUTHORIZATION=self.auth,
+            format='json',
+            )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED,
+                         'Got error: {}'.format(response.content))
+        self.assertIn('id', response.data, 'Missing id')
+        self.assertIn('movie', response.data, 'Missing movie')
+        self.assertIn('notifications', response.data, 'Missing notifications')
+        </code></pre>
+        <aside class="notes" data-markdown>
+            * remember the mock in the gplus example
+            * using factory-boy to create test data
+             - https://factoryboy.readthedocs.org/en/latest/index.html
+            * TokenTestCase provides the generate token call
+            * pass the JWT in each request
+            * test when the user in header is not the user in data
+            * create watchlist used while making the code actually work - TDD
+            * CSV export test
+             - calls admin page and POST a form :(
+        </aside>
+    </section>
+    <section>
+        <div data-markdown>
+            ## Happy, Happy. Joy, Joy
+
+            Look! It went GREEN! I am personally validated!
+        </div>
+        <img height="500px" src="images/testcoverage-current.png" alt="Coverage 89%" />
+        <aside class="notes" data-markdown>
+            * define coverage
+            * look at the report
+             * https://coveralls.io/builds/2832996
+        </aside>
+    </section>
+</section>
+
+<section>
+    <div data-markdown>
+        ## The Final Slide
+
+        ASCII art for the win.
+    </div>
+    <pre><code>
+.
+├── apiary.apib
+├── app
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── settings
+│   │   ├── base.py
+│   │   ├── development.py
+│   │   ├── heroku.py
+│   │   ├── __init__.py
+│   │   ├── production.py
+│   │   ├── __pycache__
+│   │   └── test.py
+│   ├── static
+│   │   └── app
+│   │       ├── favicon.png
+│   │       ├── logo.png
+│   │       ├── logo.svg
+│   │       └── robots.txt
+│   ├── templates
+│   │   └── app
+│   │       └── coming_soon.html
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── test_static.py
+│   │   └── test_validate.py
+│   ├── urls.py
+│   ├── views.py
+│   └── wsgi.py
+├── custom_rest_framework
+│   ├── __init__.py
+│   ├── __pycache__
+│   └── viewsets.py
+├── LICENSE
+├── manage.py
+├── movies
+│   ├── admin.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_auto_20150614_1740.py
+│   │   ├── 0003_auto_20150615_1633.py
+│   │   ├── __init__.py
+│   │   └── __pycache__
+│   ├── models.py
+│   ├── __pycache__
+│   ├── serializers.py
+│   ├── service
+│   │   ├── __init__.py
+│   │   ├── omdb.py
+│   │   └── __pycache__
+│   ├── tests
+│   │   ├── factories.py
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── test_admin_actions.py
+│   │   ├── test_api.py
+│   │   └── test_models.py
+│   ├── urls.py
+│   └── views.py
+├── Procfile
+├── Procfile.dev
+├── README.md
+├── requirements
+│   ├── base.txt
+│   ├── develop.txt
+│   ├── production.txt
+│   ├── stackato.txt
+│   └── test.txt
+├── requirements.txt
+├── runtime.txt
+├── users
+│   ├── admin.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── __init__.py
+│   │   └── __pycache__
+│   ├── models.py
+│   ├── __pycache__
+│   ├── serializers.py
+│   ├── social.py
+│   ├── static
+│   │   └── users
+│   │       └── images
+│   │           └── avatar-default.png
+│   ├── tests
+│   │   ├── factories.py
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── test_api.py
+│   │   ├── test_models.py
+│   │   └── test_static.py
+│   ├── urls.py
+│   └── views.py
+└── utils
+    ├── actions.py
+    ├── admin.py
+    ├── __init__.py
+    ├── migrations
+    │   └── __init__.py
+    ├── models.py
+    ├── __pycache__
+    ├── tests.py
+    └── views.py
+    </code>
+    </pre>
+    <aside class="notes" data-markdown>
+        * what is left to do?
+         - tests and errors for PUT calls
+         - nested routes untested, and not working
+         - changes due to UI interaction
+         - deployment to a 2nd cloud stack
+    </aside>
+</section>
+
+<section id="questions">
+    <h2>Questions</h2>
+    <p class="fragment">&lt;insert question here&gt;</p>
+    <aside class="notes" data-markdown>
+    </aside>
+</section>

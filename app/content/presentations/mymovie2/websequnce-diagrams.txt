@@ -1,0 +1,26 @@
+title Admin pages authentication
+
+Admin pages->+django.contrib.auth: username/password login
+django.contrib.auth->+database: lookup username
+database-->-django.contrib.auth: validate login
+django.contrib.auth-->-Admin pages: set browser session cookie
+
+
+title Social network authentication
+
+Client UI->+Social provider: authenticate
+Social provider-->-Client UI: access token
+Client UI->+social.auth: access token
+social.auth->+Social provider: request data with access token
+Social provider-->-social.auth: user information
+social.auth->database: get or create user
+social.auth-->-Client UI: JSON Web Token
+
+title API calls authentication
+
+Client UI->+rest.framework: call API with JWT
+rest.framework->+jwt: authenticate using jwt
+jwt->+database: lookup user id
+database-->-jwt: return user object
+jwt-->rest.framework: validated user
+rest.framework-->-Client UI: API data

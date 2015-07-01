@@ -4,16 +4,17 @@ description: An simple introduction to REST API
 created: 2014-06-04 21:00:00
 share: true
 comments: false
-image: 
-image_caption: 
+image: /slacker-rest/images/title.png
+image_caption:
 ---
 
 An introduction to adding a REST API to a Python Django application, tools to access the API "by hand", and to document it.
 <!--more-->
 
-[Slacker's Guide to REST API](Slackers-Guide-REST.pdf) slides - in PDF format.
+## [Slacker's Guide to REST API](Slackers-Guide-REST.pdf)
+
+[![click to view the slides](images/title.png)](Slackers-Guide-REST.pdf)
 
 Postman files from the presentation
 * [Environment definition](Reeder-Local.postman_environment.txt)
 * [Collection of endpoints](Reeder-Demo.postman_collection.txt)
-

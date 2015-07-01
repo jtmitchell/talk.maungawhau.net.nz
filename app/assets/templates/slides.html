@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block css %}
+	<link rel="stylesheet" href="/vendor/reveal/css/reveal.min.css">
+	<link rel="stylesheet" href="/vendor/reveal/css/theme/night.css" id="theme">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+	<!-- Code syntax highlighting -->
+	<link rel="stylesheet" href="/vendor/reveal/lib/css/zenburn.css">
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement( 'link' );
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match( /print-pdf/gi ) ? '/vendor/reveal/css/print/pdf.css' : '/vendor/reveal/css/print/paper.css';
+		document.getElementsByTagName( 'head' )[0].appendChild( link );
+	</script>
+	<!--[if lt IE 9]>
+	<script src="/vendor/reveal/lib/js/html5shiv.js"></script>
+	<![endif]-->
+{% endblock %}
+
+{% block body %}
+		<div class="reveal">
+			<div class="slides">
+				{% block content %}
+				{{ content|safe }}
+				{% endblock %}
+			</div>
+		</div>
+
+		<script src="/vendor/reveal/lib/js/head.min.js"></script>
+		<script src="/vendor/reveal/js/reveal.min.js"></script>
+
+		{% block config %}
+		<script>
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: '/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: '/vendor/reveal/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '/vendor/reveal/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '/vendor/reveal/plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: '/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+					{ src: '/vendor/reveal/plugin/notes/notes.js', async: true }
+				]
+			});
+		</script>
+		{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,250 @@
+---
+title: MyMovie
+description: Setting up the MyMovie project
+author: James Mitchell
+---
+				<section>
+					<h1>MyMovie</h1>
+					<p><emphasis>Tracking movies so you don't have to.</emphasis></p>
+					<p>
+							<a href="http://www.maungawhau.net.nz/">James Mitchell</a>
+					</p>
+					<span class="social-share">
+						<ul>
+							<li><a href="https://plus.google.com/+JamesMitchell" target="_blank"><i class="fa fa-google-plus"></i></a></li>
+							<li><a href="https://twitter.com/saywibble" target="_blank"><i class="fa fa-twitter"></i></a></li>
+							<li><a href="https://nz.linkedin.com/pub/james-mitchell/4/832/8b5" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+						</ul>
+					</span>
+				</section>
+
+				<section>
+					<section>
+						<h2>Introduction</h2>
+						<p>A series of talks covering the &ldquo;life cycle&rdquo; of a project.</p>
+						<aside class="notes" data-markdown>
+							* Planning the project
+							* setup
+							* execution
+							* profit (or failure...)
+
+							* pre-production
+							* production
+							* post-production and distribution
+						</aside>
+					</section>
+
+					<section>
+						<h2>Talk 1</h2>
+						<p>
+							<q cite="http://en.wikipedia.org/wiki/Casablanca_(film)">
+								&ldquo;Louie, I think this is the beginning of a beautiful friendship.&rdquo;
+							</q>
+						</p>
+						<p>Things to do before writing any code.</p>
+						<ul>
+							<li class="fragment">Getting the requirements</li>
+							<li class="fragment">Writing down the first tasks</li>
+							<li class="fragment">Setting up tools and services</li>
+							<li class="fragment">Heavy thinking</li>
+						</ul>
+						<aside class="notes" data-markdown>
+							* Getting the requirements.
+							* Starting a django app.
+							* Making a sprint.
+							* Planning for continuous integration.
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Pre-Production</h2>
+						<h3>What is the project about?</h3>
+						<p>A tool to remind me when movies I'm interested in are released&hellip;</p>
+							<span class="fragment">in the cinema,</span>
+							<span class="fragment">on DVD,</span>
+							<span class="fragment">for rental</span> <span class="fragment">(weekly!)</span>
+
+					</section>
+					<section>
+						<h2>&ldquo;&hellip;remind me&hellip;&rdquo;</h2>
+						<ul>
+							<li>The application needs a concept of <strong>me</strong></li>
+							<li>There is a regular process that checks stuff and reminds me</li>
+						</ul>
+						<aside class="notes" data-markdown>
+							* User model, extra profile data.
+							* Email alerts.
+						</aside>
+					</section>
+					<section>
+						<h2>&ldquo;&hellip;movies I'm interested in&hellip;&rdquo;</h2>
+						<p>The application needs a concept of <strong>movies</strong>, and a link from me to a movie.</p>
+						<aside class="notes" data-markdown>
+							* Movie model
+							* user/movie link is a wishlist.
+							* Social aspect?
+						</aside>
+					</section>
+					<section>
+						<h2>&ldquo;&hellip;released to cinema, DVD, and rental&hellip;&rdquo;</h2>
+						<p>A service we can query for release dates for cinema, DVD, and rental&hellip;</p>
+						<aside class="notes" data-markdown>
+							* Rotten Tomatoes
+							* The Movie DB
+							* Netflix
+							* Open Movie DB
+							 * http://www.omdbapi.com/?s=mad+max&t=movie
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<h2>Extreme Wide Shot</h2>
+					<p>What should this look like?</p>
+					<ul>
+						<li class="fragment">A responsive webapp for searching for movies and adding them to a wishlist</li>
+						<li class="fragment">A backend API for storing the wishlist and sending notifications</li>
+						<li class="fragment">A automatic deployment process, triggered by pushing code to the repository</li>
+						<li class="fragment">A development process to track work done, and yet to do</li>
+					</ul>
+					<aside class="notes" data-markdown>
+						* UI does social auth, and sends token to API.
+						* UI searches directly on service
+						 * just adds movie id to wishlist.
+					</aside>
+				</section>
+
+				<section>
+					<h2>Close Up</h2>
+					<p>What are the &ldquo;givens&rdquo;?</p>
+					<ul>
+						<li>Python</li>
+						<li class="fragment">Version control system (VCS)</li>
+						<li class="fragment">Web based app in django</li>
+						<li class="fragment">Deployed into the cloud</li>
+						<li class="fragment">UI in AngularJS</li>
+					</ul>
+					<aside class="notes" data-markdown>
+						* Deployment options
+						 * Google App Engine
+						 * Heroku
+						 * Cloudfoundry / Stackato
+						 * pure AWS.
+
+						Can run staging and production on different clouds for LOLZ
+					</aside>
+				</section>
+
+				<section>
+					<section>
+						<h2>Wide shot</h2>
+						<p>What additional tools are in the frame?</p>
+						<aside class="notes" data-markdown>
+							What will make developmen more fun? Easier?
+						</aside>
+					</section>
+					<section>
+						<h2>Version Control</h2>
+						<h3>github</h3>
+						<p>Using a local version control system is a given, but also push code to a VCS in the cloud, and use API webhooks to integrate with other cloud services.</p>
+						<p><i>Alternatives are Bitbucket, Gitlab, or even Launchpad.</i></p>
+						<aside class="notes" data-markdown>
+							* Webhooks.
+							* Service integrations.
+							* Code changes trigger *EVERYTHING*
+						</aside>
+					</section>
+					<section>
+						<h2>Automatic Testing</h2>
+						<h3>Travis-CI</h3>
+						<p>Whenever changes are pushed to github, Travis-CI will checkout a copy of the code,
+							build it, and execute tests.</p>
+						<p>The build process should also trigger a deployment to test and production servers.</p>
+						<p><i>Alternatives are Jenkins or Bamboo</i></p>
+						<aside class="notes" data-markdown>
+							* Code coverage with Coveralls service.
+							* Check in python shell, then make it a test.
+						</aside>
+					</section>
+					<section>
+						<h2>Tracking new features</h2>
+						<h3>Pivotal Tracker</h3>
+						<p>A tool to track new features and estimate when they can be completed.</p>
+						<p>Ideally the tool should link to the VCS and record what code implemented a feature.</p>
+						<p><i>Alternatives are Jira, Trac, Basecamp, or Stick-It notes.</i></p>
+						<aside class="notes" data-markdown>
+							* Instead of also tracking bugs in Pivotal, I choose to use github's issue tracker for
+							bugs.
+							* git hooks to add story id from branch name into commit messages
+						</aside>
+					</section>
+					<section>
+						<h2>Group chat</h2>
+						<h3>Slack</h3>
+						<p>For a team of developers, somewhere to ask questions, hold meetings, share documents and internet memes</p>
+						<p>Also useful as a place for notifcations from github and travis-ci</p>
+						<p><i>Alternatives are Hipchat, Campfire, perhaps email or an XMPP client&hellip;</i></p>
+						<aside class="notes" data-markdown>
+							Service will notify once deployement is complete.
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<h2>Cut to - Setting up</h2>
+					<p>Let's setup the github repository, and connect it to Travis-CI, Slack, and Pivotal Tracker.</p>
+					<aside class="notes" data-markdown>
+						* create github repo
+						* clone repo locally
+						* eclipse settings .project .pydevproject
+						* virtualenv
+						 * mkvirtualenv mymovie
+						 * .venv (override the cd command)
+						* requirements.txt
+						 * django
+						 * django-rest-framework
+						* pip install -r requirements.txt
+						* django-admin startproject mymovie - then rearrange up one directory
+						* make a test
+						 * simple import of settings to prove app can start
+						 * ./manage.py test
+						 * git push
+						* travic-ci
+						 * add github repo from travis
+						* slack
+						 * add notification.slack to config
+						* pivotal-tracker
+						 * add service and API token from tracker
+						 * add project, make epics and stories
+						 * git hooks prepare-commit-msg to add story id to commit based on branch "my-feature-branch-12345678"
+						* coverage with coveralls
+						 * add repo at coveralls
+						 * update travis conf
+					</aside>
+				</section>
+
+				<section>
+					<h2>Over the Shoulder Shot</h2>
+					<p>Use a whiteboard to work stuff out</p>
+					<ul>
+						<li>Database</li>
+						<li>UI flow</li>
+						<li>API</li>
+					</ul>
+					<aside class="notes" data-markdown>
+						* Take photo to document.
+						* API documentation
+						 * apiary.io
+						 * mulesoft
+					</aside>
+				</section>
+
+				<section>
+					<h2>Noddy shot</h2>
+					<p>Next time we aim to write some actual code!</p>
+					<p class="fragment">Questions?</p>
+					<aside class="notes" data-markdown>
+					</aside>
+				</section>

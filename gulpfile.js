@@ -82,6 +82,16 @@ gulp.task('fonts', function () {
     .pipe($.size({title: 'fonts'}));
 });
 
+// Copy all vendor files
+gulp.task('vendor', function () {
+  return gulp.src([
+    'vendor/**'
+  ], {
+    dot: true
+  }).pipe(gulp.dest('dist/vendor'))
+    .pipe($.size({title: 'copy'}));
+});
+
 // Compile and automatically prefix stylesheets
 gulp.task('styles', function () {
   // For best performance, don't add Sass partials to `gulp.src`
@@ -158,7 +168,7 @@ gulp.task('serve', ['styles', 'content'], function () {
   gulp.watch(['app/styles/**/*.{scss,css}'], ['styles', reload]);
   gulp.watch(['app/scripts/**/*.js'], ['jshint']);
   gulp.watch(['app/images/**/*'], ['images', reload]);
-  
+
   // watch for static aite changes
   gulp.watch(['app/assets/templates/**'], ['content', reload]);
   gulp.watch(['app/content/pages/**'], ['pages', 'sitemap', reload]);
@@ -180,7 +190,7 @@ gulp.task('serve:dist', ['default'], function () {
   gulp.watch(['app/styles/**/*.{scss,css}'], ['styles', reload]);
   gulp.watch(['app/scripts/**/*.js'], ['jshint']);
   gulp.watch(['app/images/**/*'], ['images', reload]);
-  
+
   // watch for static aite changes
   gulp.watch(['app/assets/templates/**'], ['content', reload]);
   gulp.watch(['app/content/pages/**'], ['pages', 'rss', 'sitemap', reload]);
@@ -189,7 +199,7 @@ gulp.task('serve:dist', ['default'], function () {
 
 // Build production files, the default task
 gulp.task('default', ['clean'], function (cb) {
-  runSequence('styles', 'content', ['jshint', 'images', 'fonts', 'copy'], cb);
+  runSequence('styles', 'content', ['jshint', 'images', 'fonts', 'copy', 'vendor'], cb);
 });
 
 // gulp.task('default', ['content', 'images', 'fonts', 'styles', 'favicon', 'rss']);

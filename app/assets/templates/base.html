@@ -36,29 +36,31 @@
     <!--
     <link rel="canonical" href="http://www.example.com/">
     -->
-    
+
 	<!-- RSS -->
 	<link rel="alternate" type="application/rss+xml" title="{{site.title}} Posts" href="{{site.url}}/rss.xml" />
-	
+
     <!-- Page styles -->
+    {% block css %}
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    {% endblock %}
     {% block extra_css %}{% endblock %}
   </head>
   <body class="{{page.nav}}">
 
-	
+    {% block body %}
     <header class="app-bar promote-layer">
       <div class="app-bar-container">
         <button class="menu"><img src="/images/hamburger.svg" alt="Menu"></button>
-        
+
         <h1 class="logo"><a href="/"><img src="/images/logo.svg">{{site.title}}</a></h1>
         <section class="app-bar-actions">
         <!-- Put App Bar Buttons Here -->
         <!-- e.g <button><i class="icon icon-star"></i></button> -->
         {% block app-bar-actions %}
         {% endblock %}
-\        </section>
+        </section>
       </div>
     </header>
 
@@ -67,28 +69,32 @@
       <ul>
         <li {% if page.nav == "home"%}class="active"{% endif%}>
         	<a href="{{site.urlRoot}}">Home</a>
-    	</li>
-        <li {% if page.nav == "presentations"%}class="active"{% endif%}>
+  	   </li>
+       <li {% if page.nav == "presentations"%}class="active"{% endif%}>
         	<a href="{{site.urlRoot}}presentations.html">Presentations</a>
-    	</li>
+	     </li>
+       <li>
+          <a href="//www.maungawhau.net.nz/">Maungawhau IT Home</a>
+       </li>
       </ul>
     </nav>
 
 	<div class="clear"></div>
     <main>
-				
+
 		{% block main %}
 		<section class="container">
 			<h2>{{page.title|title}}</h2>
 			<div>{% block content %}{% endblock %}</div>
-		</section> 
+		</section>
 		{% endblock %}
-				
+
 		<div class="clear"></div>
 		<footer class="centre small">
 			<p>&copy; Copyright 2014-{{site.time|date('Y')}} Maungawhau Information Technology Ltd. All rights reserved.</p>
 		</footer>
     </main>
+    {% endblock %}
 
     <!-- build:js scripts/main.min.js -->
     <script src="/scripts/main.js"></script>
@@ -105,6 +111,6 @@
       ga('send', 'pageview');
     </script>
 {% endif %}
-    <!-- Built with love using Web Starter Kit -->
+
   </body>
 </html>

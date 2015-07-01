@@ -14,6 +14,8 @@ var path = require('path');
 var rename = require('gulp-rename');
 var gutil = require('gulp-util');
 
+var debug = require('gulp-debug');
+
 var site = {
 		'title': 'Maungawhau IT',
 	    'url': 'http://talk.maungawhau.net.nz',
@@ -22,7 +24,7 @@ var site = {
 	    'email': 'james.mitchell@maungawhau.net.nz',
 	    'twitter': 'saywibble',
 	    'google_verify': '',
-	    'analytics_id': '',
+	    'analytics_id': 'UA-62644260-2',
 	    'time': new Date()
 }
 
@@ -68,19 +70,25 @@ gulp.task('cleanpresentations', function () {
 
 gulp.task('presentations', ['cleanpresentations'], function () {
     var images = gulp.src(['app/content/presentations/**/*.jpg','app/content/presentations/**/*.png'])
-    .pipe(gulp.dest('dist/images'));
+    		.pipe(gulp.dest('dist'));
     var extras = gulp.src(['app/content/presentations/**/*.pdf','app/content/presentations/**/*.txt'])
-    .pipe(gulp.dest('dist'));
+    		.pipe(gulp.dest('dist'));
+		var slides = gulp.src('app/content/presentations/**/*.slides')
+				.pipe(frontMatter({property: 'page', remove: true}))
+				.pipe(applyTemplate('app/assets/templates/slides.html'))
+				.pipe(rename({extname: '.html'}))
+				.pipe(gulp.dest('dist'));
     var presentations = gulp.src('app/content/presentations/**/*.md')
         .pipe(frontMatter({property: 'page', remove: true}))
         .pipe(marked())
         .pipe(summarize('<!--more-->'))
+				.pipe(debug({minimal: false}))
         // Collect all the presentations and place them on the site object.
         .pipe((function () {
             var presentations = [];
             var tags = site.tags || [];
             return through.obj(function (file, enc, cb) {
-                file.page.url = 'presentations/' + path.basename(file.path, '.md');
+                file.page.url = path.dirname(file.path.replace(file.base,'')) + '/' + path.basename(file.path, '.md');
                 presentations.push(file.page);
                 presentations[presentations.length - 1].content = file.contents.toString();
 

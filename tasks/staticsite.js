@@ -23,7 +23,7 @@ var site = {
 	    'author': 'James Mitchell',
 	    'email': 'james.mitchell@maungawhau.net.nz',
 	    'twitter': 'saywibble',
-	    'google_verify': '',
+	    'google_verify': 'ly8QgWAy0wwtyg5EoDAcuzhxRvsglDkNS740NVwHLco',
 	    'analytics_id': 'UA-62644260-2',
 	    'time': new Date()
 }

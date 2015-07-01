@@ -1,7 +1,7 @@
 sudo: false
 cache:
   directories:
-    - node_modules
+  - node_modules
 branches:
   only:
   - master
@@ -13,19 +13,19 @@ install:
 - npm install
 script:
 - gulp
-# deploy:
-  # provider: s3
-  # skip_cleanup: true
-  # bucket: talk.maungawhau.net.nz
-  # region: ap-southeast-1
-  # endpoint: www.maungawhau.net.nz.s3-website-ap-southeast-1.amazonaws.com
-  # acl: public_read
-  # local_dir: dist
-  # detect_encoding: true
-  # access_key_id:
-    # secure: IK5cC4HSeRjyC9hC21xVskq9G7NmpxADZMG3x7MW7/1aP7NcWGi8KpYM9t5kkTRpdPHaCZK/MKvG8ykDuvm3rS+VyE86g7otm7TaMoqbKlT4auGZws3zGPSOQHpBC2IrJxJWcIiM82WUg/VS3AiNMkDK8gTNMbP4pz5riIOyFhU=
-  # secret_access_key:
-    # secure: IdM7CRt/ehvc4oBvhTVWPlsXKSkk1LBqxhs8QXux9z5LLLthcoIIFT6KrUxXB5OAALLeBIThpgQ1MB7IVo6U2Gk9yQE2WvrfKHRPzDXxjmwabEXGkU+71CPf4/JxIwTOMBCXDIF3aZTi8jOQGRnf2lJqPJO8Rj1hwBLF7SZMMs8=
-# notifications:
-  # slack:
-    # secure: T+WFYFXx+dH1k95jqBT2jFj5AzZDbNs3/k/K5L226zvGG5ia44CJa7sUk12Liew3z3QWFdeXoaUdmpwYRQu5i1IZQeo/OMoicnKSleMfuETwpEqbsI+dZwcc5T4AJZpN6DnRvOOhaV4ciAIm30Ooo5lGAb9WIFVrPpqZ0pE9Dvg=
+deploy:
+  provider: s3
+  skip_cleanup: true
+  bucket: talk.maungawhau.net.nz
+  region: us-east-1
+  endpoint: talk.maungawhau.net.nz.s3-website-us-east-1.amazonaws.com
+  acl: public_read
+  local_dir: dist
+  detect_encoding: true
+  access_key_id:
+    secure: k9VWUETzDWdGaMt9HmFrS/utEqkjnhaFWSDL3Bh57AIC++JBluQPIYSY3TABQm5gXHc/2/j+OjkXtSKUNhxFV7r+Be9NUbfIXxzhx/mKmHZiIe7pjuWUsc0I+S/I96gwIzHwKPcdklAAflQkJwJY0O5JnoLvE2yRpgXwNn658N0Qi0scjj7YyebsjPu1neyTejao7XCLrx+g2ryIAqZJDM1zTNIAgHFmDJ2at3gTuKwvQEuym2Z1xG5f3YIpvXndIC3k7fnnL9QNtucERJnIfH14bgXAbxCP8zxwnBp69pwzjcQd1GYvxaK60qYCqA75pdV0yNRXH5QNcGKj/KtwGmZYBK1gTVtch8+70R5cnxXdHJVYhPIyhgHVnSN0yv9WdQDskYfnVjDkk3QjM0B4QkSwiP8pYs0oHWgwOQghSInA+ifJovKd68D5RUIfw8PmKrPs/9SzxwDtlSrE+yUJdh+Ypwi1xY/SOEde1qrJM9asLuyMjExITO153UfiZsLOEEcnrt2W0nvsR2PBq2YJ6jRytPhMolyLpuMaU5lQA2TTvBeLZ51Q1803uBBhwj6AED198SEwv/DElS2p1hBYRMUaDLpR6EggLdoc0B0PhUYXM7vO3y/JrsjoS2Lhp6V/3+k2Sma5FqOTzLFrRAed61uG4/FymXY7W9Mqfnw9Mgc=
+  secret_access_key:
+    secure: M7xQN3Wwiia5bYbW1CiNhsiUmdLucIYdBENTUOk9/mrS00bxP3fskdp6P4LSo75tEEISp0sUNfEBe5Hv8xw19zyui+bL7kVQJ+0BaTIVtH4NKSzdZrmI0nX7lmu4Z55p2USBSZM67qNpOQVxJwAJeCuKoow228P167W4Td/RBUdkymRqWER47LxBQNkVzpbECFCw1BKXpgM0L1d7hcJteHQsPx+w3bGlYRmzsOpOL/ChIbwTqUh9C30Gb9ANOIi2PcV33mHPUEU9aEDhvSdRDsbDNNtKwOq+AecyDudTWXRekHhj6u0MqZsRnCLudTvr6QGTDZKnFYDnBbxDxQLv9SWZZzf7xLI6XnsTh7MobIS5t7Zc3zsj+usBNVuI9Txrg21ZVhiDIP9awCPh6MIfwxMomdHdXlXRVtIgAyoHOvP6pOQb5yjjqRA/gpQ4ZheQ89Kf83KWEMAMNv5YbmMrJIncsuzyEwdRkpV1c3YdaL3ocKNpcuyc3XYj10WtR8jB0ygaF4/h4nYfDe3P64LSlZvMl4BFQCB3T20e1bIW8NUxhGk02+oRfIyS4JmwYUhlFH6XpepZsY0Bjwu+Ae1xsQ3OK64sRujere6uVPKlIUlKHD6FSyTsrP+x9WNqNPJjPUm4aI3L/WyF0qLAvu7x4ojEB2dTZibZWH2X+FKfEUY=
+notifications:
+  slack:
+    secure: lCUbuv7UKXZQ4cMDPmarz0pcM3/mJH5CnsEOL8CAaQigXnsTnvokxT7g9CfMWls68RtGBcBdqUBLqkoLa5NRX+RqdVnVw7BEF48MhVuiyRkpvD1idGMKAwV6JeViwiE/izFd23avF5jHNYOt8xXTbcoYKyIqfmDWR2HozL1ew6a6eRYuFmPo7hKfha+UZ64+bXI2RNTauFEkreQzgJawIXPJvMwsUdTGjeroh2xUxdzGwXgi/aBByqsAJ2k1ruDGPQGyImPW54M5OglGDpvmtRqmFjEDh1WUpCNfDU3uH9ZVs3zKKBXqmlCKvtk2Es/P+QCHXU9fWSdEFdlTjm64d0VjHbQlRuhTsNpoRxsI/bzrK+SXqwFSgjRHo3whUz4qEeqdb5aZu5S+3b41xGex4hwvzQV3qID2avI2We51Yg0U9H0IpHw2SJfGoNZ0NK7z4t/FHkIqnG43Vcu5cEe3V8A7PPYO3iBTXrhobTOiBqVyLtwvRcfzu3SuXTDDi8hJaeKSeT+R50ZGDUXRcJCNAsfyuHGWr8Wf+FRoyYbIYZyHxxpAWxPqNRH8ISGC31S1IAoG62oxSj6vmfT/pB+79H7RhqTHAPyF3jBaGjpNzI3+onr1BPa7xxE4UQgRvEDeUsogTBrsI7VUBTj3rEVeAGDzdHEauXYAgq+MP04KXcQ=

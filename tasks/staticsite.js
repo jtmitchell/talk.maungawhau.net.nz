@@ -114,7 +114,7 @@ gulp.task('presentations', ['cleanpresentations'], function () {
         })())
         .pipe(applyTemplate('app/assets/templates/presentation.html'))
         .pipe(gulp.dest('dist'));
-    return merge(images, extras, presentations);
+    return merge(images, extras, slides, presentations);
 });
 
 
@@ -124,7 +124,7 @@ gulp.task('cleanpages', function () {
 });
 
 
-gulp.task('pages', ['cleanpages'], function () {
+gulp.task('pages', ['cleanpages', 'presentations'], function () {
     var html = gulp.src(['app/content/pages/*.html'])
         .pipe(frontMatter({property: 'page', remove: true}))
         .pipe(through.obj(function (file, enc, cb) {
@@ -178,4 +178,4 @@ gulp.task('sitemap', ['presentations', 'pages'], function () {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('content', ['presentations', 'pages', 'rss', 'sitemap']);
+gulp.task('content', ['pages', 'rss', 'sitemap']);

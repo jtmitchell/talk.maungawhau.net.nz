@@ -8,3 +8,4 @@ dist
 .env
 .tern-project
 *~
+.tags

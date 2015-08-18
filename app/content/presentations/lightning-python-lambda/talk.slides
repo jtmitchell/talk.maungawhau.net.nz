@@ -1,0 +1,238 @@
+---
+title: AWS Lambda and Python
+description: How to execute Python scripts on AWS Lambda
+author: James Mitchell
+---
+
+<!--
+<section>
+	<div data-markdown>
+	</div>
+	<pre><code class="python" data-trim>
+	</code></pre>
+	<aside class="notes" data-markdown>
+	</aside>
+</section>
+
+<section>
+	<h2></h2>
+	<p>
+	</p>
+	<aside class="notes" data-markdown>
+	</aside>
+</section>
+-->
+
+<section>
+	<h1>Lambda and Python</h1>
+	<p><emphasis>Using AWS Lambda to run Python scripts</emphasis></p>
+	<p>
+			<a href="http://www.maungawhau.net.nz/">James Mitchell</a>
+	</p>
+	<span class="social-share">
+		<ul>
+			<li><a href="https://plus.google.com/+JamesMitchell" target="_blank"><i class="fa fa-google-plus"></i></a></li>
+			<li><a href="https://twitter.com/saywibble" target="_blank"><i class="fa fa-twitter"></i></a></li>
+			<li><a href="https://nz.linkedin.com/pub/james-mitchell/4/832/8b5" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+		</ul>
+	</span>
+</section>
+
+<section>
+	<div data-markdown>
+	## What is AWS Lambda?
+
+	&ldquo;
+	_AWS Lambda is a compute service that runs your code in response to events and automatically manages the compute resources for you..._
+	&rdquo;
+	* you do not provision the EC2 resources, the code &ldquo;just runs&rdquo;
+	* the code is executed in response to events on other AWS services, such as S3, SNS, DynamoDB etc..
+	* or executed by the Amazon API Gateway (&#8678; choose this one!)
+	* only supports Java and Node.js &#9785;
+
+	</div>
+	<aside class="notes" data-markdown>
+	</aside>
+</section>
+
+<section>
+	<div data-markdown>
+	## Adding some Python
+
+	We can make it work by getting a node.js script to execute the Python script!
+
+	* [WillyG - Python on AWS Lambda](http://willyg302.github.io/blog/posts/2015-03-29-python-on-aws-lambda/)
+	* [Tim Wagner - Using Python in an AWS Lambda Function](https://aws.amazon.com/blogs/compute/using-python-in-an-aws-lambda-function/)
+	* [Eric Hammond provides a wrapper function](https://github.com/alestic/lambda-function-wrapper)
+
+	</div>
+	<aside class="notes" data-markdown>
+	</aside>
+</section>
+
+<section>
+	<section>
+		<div data-markdown>
+		## 1 - Hello World in Python
+
+		* [sample code on Github](https://github.com/jtmitchell/lambda-function-wrapper)
+		* accept a JSON object from the wrapper, write JSON to stdout
+		* use virtualenv to bundle in python and extra libraries
+		</div>
+		<pre><code class="python" data-trim>
+import sys
+import json
+
+def main(event):
+    name = event.get('name', 'Mr. Eastwood')
+    response = dict(greeting='Hello', name=name)
+    print(json.dumps(response))
+
+if __name__=='__main__':
+    argv = sys.argv[1:]
+    event = json.loads(argv[0])
+    main(event)
+		</code></pre>
+		<aside class="notes" data-markdown>
+		</aside>
+	</section>
+</section>
+
+<section>
+	<section>
+		<div data-markdown>
+		## 2.1 - Lambda Wrapper Script
+
+		* This script runs our Python script
+		* Communication is via "stringified" JSON
+
+		</div>
+		<pre><code data-trim>
+var spawn = require('child_process').spawn;
+exports.handler = function(event, context) {
+  var response = {};
+  var error = null;
+  var child = spawn('venv/bin/python', [
+	  'lambda-function.py',
+	  JSON.stringify(event, null, 2)
+		]);
+  child.stdout.on('data', function (data) {
+    console.log("stdout:\n"+data);
+    response = JSON.parse(data);
+  });
+  child.stderr.on('data', function (data) {
+    console.log("stderr:\n"+data);
+    error = { error: true, message: data.toString('utf8') };
+  });
+  child.on('close', function (code) {
+    if (error !== null ) { context.fail(error); }
+    else {context.succeed(response); }
+  });
+};
+		</code></pre>
+		<aside class="notes" data-markdown>
+		</aside>
+	</section>
+	<section>
+		<div data-markdown>
+		## 2.1 - Lambda Function
+
+		* upload a ZIP of the directory to S3 bucket
+		* ...this takes a while to upload 39Mb of Python
+		* make an IAM role for executing the function
+		* create the Lambda function
+
+		</div>
+		<pre><code class="shell" data-trim>
+		$ aws lambda create-function \
+--region us-east-1 \
+--function-name helloworld \
+--code S3Bucket=maungawhau.lambda,S3Key=hello-lambda.zip \
+--role arn:aws:iam::569584872835:role/lambda_basic_execution \
+--handler lambda-function-wrapper.handler \
+--runtime nodejs
+		</code></pre>
+		<aside class="notes" data-markdown>
+		* update your awscli using pip to 1.7 or more
+		* I had 1.2 from trusty repos
+		* available regions http://docs.aws.amazon.com/general/latest/gr/rande.html#lambda_region
+		* use s3 bucket to avoid expired signature on the upload
+		* or just use Python2.6 and no extra libs
+		* aws lambda create-function --region us-east-1 --function-name helloworld --role arn:aws:iam::569584872835:role/lambda_basic_execution --handler lambda-function-wrapper.handler --runtime nodejs --code S3Bucket=maungawhau.lambda,S3Key=hello-lambda.zip
+		</aside>
+	</section>
+
+	<section>
+		<div data-markdown>
+		## 2.3 - AWS Lambda Console
+
+		Once it is running, use the console to check logs and number of calls.
+
+		[![AWS Lambda Console](images/aws-lambda-console-small.png)](images/aws-lambda-console.png)
+		</div>
+		<aside class="notes" data-markdown>
+		* test the function
+		* look at logs files
+		* monitor run durations
+		</aside>
+	</section>
+</section>
+
+
+
+<section>
+	<section>
+		<div data-markdown>
+		## 5.1 - API Gateway
+
+		Configure a new API on AWS, with a resource that executes the Lambda function.
+		[![AWS API Gateway](images/aws-gateway-1-small.png)](images/aws-gateway-1.png)
+
+		</div>
+		<aside class="notes" data-markdown>
+		* http://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started.html
+		</aside>
+	</section>
+	<section>
+		<div data-markdown>
+		## 5.2 - Say &ldquo;Hello&rdquo; to my little friend
+		</div>
+		<pre><code data-trim>
+$ curl -X GET https://hostname/test/greeting
+{"name":"Mr. Eastwood","greeting":"Hello"}
+
+$ curl -X POST -d '{"name": "Clint"}' https://hostname/test/greeting
+{"name":"Clint","greeting":"Hello"}
+
+		</code></pre>
+		<aside class="notes" data-markdown>
+		* https://jdow62ruh9.execute-api.us-east-1.amazonaws.com/test/greeting
+		</aside>
+	</section>
+	<section>
+		<div data-markdown>
+		## 5.3 - Again... with Pictures
+		[![AWS API Gateway](images/aws-gateway-4-small.png)](images/aws-gateway-4.png)
+		</div>
+		<aside class="notes" data-markdown>
+		</aside>
+	</section>
+</section>
+
+<section>
+	<div data-markdown>
+	## Conclusions
+	* no EC2 instance, no server maintenance
+	* FREE - first million requests per month
+	* then $0.20 per 1 million requests
+	* great for a simple endpoint, reacting to an event
+	* terrible for a Django app
+	</div>
+	<aside class="notes" data-markdown>
+	* https://aws.amazon.com/lambda/pricing/
+	* charge based on requests and time used
+	* normal charges for any other services used
+	* this example seems to take 700ms
+	* 39Mb for BYO Python vs 1kb for Python 2.6 "native"
+	</aside>
+</section>

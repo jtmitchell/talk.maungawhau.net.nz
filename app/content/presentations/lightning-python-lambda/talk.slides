@@ -40,8 +40,9 @@ author: James Mitchell
 
 <section>
 	<div data-markdown>
-	## Deployment Matrix
+	## Deploying Your App
 
+  What needs to be deployed...
 	![Deployment Matrix](images/aws-lambda-deployment-matrix.png)
 	</div>
 	<aside class="notes" data-markdown>
@@ -61,12 +62,14 @@ author: James Mitchell
 	&ldquo;
 	_AWS Lambda is a compute service that runs your code in response to events and automatically manages the compute resources for you..._
 	&rdquo;
-	* the code is executed in response to events on other AWS services, such as S3, SNS, DynamoDB etc..
-	* or executed by the Amazon API Gateway (&#8678; choose this one!)
-	* only supports Java and Node.js &#9785;
+* deploy __functions__ not applications
+* the code is executed in __response to events__ on other AWS services, such as S3, SNS, DynamoDB etc..
+* or executed by the Amazon __API Gateway__ (&#8678; choose this one!)
+* only supports Java and Node.js &#9785;
 
 	</div>
 	<aside class="notes" data-markdown>
+  * good for a micro-service
 	</aside>
 </section>
 
@@ -240,7 +243,7 @@ $ curl -X POST -d '{"name": "Clint"}' https://hostname/test/greeting
 	* no EC2 instance, no server maintenance
 	* FREE - first million requests per month
 	* then $0.20 per 1 million requests
-	* great for a simple endpoint, reacting to an event
+	* great for a __micro-service__ - simple endpoint, reacting to an event
 	* terrible for a Django app
 	</div>
 	<aside class="notes" data-markdown>

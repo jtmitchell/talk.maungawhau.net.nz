@@ -1,6 +1,7 @@
 ---
 title: My Movie Talk 1
 description: Starting a Django API webapp
+tags: [django,python,github,travis-ci]
 created: 2015-05-20 18:30:00
 share: true
 comments: false

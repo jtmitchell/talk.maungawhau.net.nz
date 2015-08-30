@@ -1,6 +1,7 @@
 ---
 title: Slacker's Guide to REST API
 description: An simple introduction to REST API
+tags: [api,rest,django,python]
 created: 2014-06-04 21:00:00
 share: true
 comments: false

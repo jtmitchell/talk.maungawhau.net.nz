@@ -1,6 +1,7 @@
 ---
 title: My Movie Talk 2
 description: Writing a Django API webapp
+tags: [django,python,travis-ci,github]
 created: 2015-06-15 18:30:00
 share: true
 comments: false

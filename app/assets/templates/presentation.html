@@ -7,7 +7,7 @@
     <em>{{page.description}}</em>
 {% endif %}
 {% if page.client %}
-		<p class="large">Client: {{page.client}}, 
+		<p class="large">Client: {{page.client}},
 			<span class="medium">
 			{{page.start}}{% if page.end %} to {{page.end}}{% endif %}
 			</span>
@@ -16,11 +16,13 @@
         <p class="published">By {% if page.author %}{{page.author}}{% else %}{{site.author}}{% endif %}
                              on {{page.created|date('M j, Y')}}<br/>
 {% endif %}
+<!--
         <span class="small">{% if page.tags %}Tags: {% endif %}
             {% for tag in page.tags %}
                 <a href="/tag/{{tag}}.html">{{tag}}</a>{% if not loop.last %} / {% endif %}
             {% endfor %}
         </span>
+-->
     </p>
 
 {% if page.share %}

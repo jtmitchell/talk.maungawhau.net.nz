@@ -40,12 +40,27 @@ author: James Mitchell
 
 <section>
 	<div data-markdown>
+	## Deployment Matrix
+
+	![Deployment Matrix](images/aws-lambda-deployment-matrix.png)
+	</div>
+	<aside class="notes" data-markdown>
+	* you do not provision the EC2 resources, the code just runs
+	* 1990s - rent a box in a datacentre
+	* 2000s - rent a VPS froma hosting company
+	* 2006 - AWS EC2 instances
+	* 2007 - Heroku
+	* 2015 - AWS Lambda
+	</aside>
+</section>
+
+<section>
+	<div data-markdown>
 	## What is AWS Lambda?
 
 	&ldquo;
 	_AWS Lambda is a compute service that runs your code in response to events and automatically manages the compute resources for you..._
 	&rdquo;
-	* you do not provision the EC2 resources, the code &ldquo;just runs&rdquo;
 	* the code is executed in response to events on other AWS services, such as S3, SNS, DynamoDB etc..
 	* or executed by the Amazon API Gateway (&#8678; choose this one!)
 	* only supports Java and Node.js &#9785;

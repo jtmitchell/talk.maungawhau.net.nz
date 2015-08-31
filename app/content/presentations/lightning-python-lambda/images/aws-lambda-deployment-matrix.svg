@@ -14,8 +14,8 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="aws-lambda.svg"
-   inkscape:export-filename="/home/james/Desktop/aws-lambda.png"
+   sodipodi:docname="aws-lambda-deployment-matrix.svg"
+   inkscape:export-filename="/home/james/work/maungawhau/Workspace/talk.maungawhau.net.nz/app/content/presentations/lightning-python-lambda/images/aws-lambda-deployment-matrix.png"
    inkscape:export-xdpi="88.164474"
    inkscape:export-ydpi="88.164474">
   <defs
@@ -354,7 +354,7 @@
          sodipodi:role="line"
          id="tspan3250-7"
          x="-251.431"
-         y="42.563866">SaaS - Heroku,</tspan><tspan
+         y="42.563866">PaaS - Heroku,</tspan><tspan
          sodipodi:role="line"
          x="-251.431"
          y="60.091419"

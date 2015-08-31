@@ -93,7 +93,6 @@ author: James Mitchell
 		<div data-markdown>
 		## 1 - Hello World in Python
 
-		* [sample code on Github](https://github.com/jtmitchell/lambda-function-wrapper)
 		* accept a JSON object from the wrapper, write JSON to stdout
 		* use virtualenv to bundle in python and extra libraries
 		</div>
@@ -111,6 +110,9 @@ if __name__=='__main__':
     event = json.loads(argv[0])
     main(event)
 		</code></pre>
+		<div data-markdown>
+		[sample code on Github](https://github.com/jtmitchell/lambda-function-wrapper)
+		</div>
 		<aside class="notes" data-markdown>
 		</aside>
 	</section>
@@ -131,9 +133,9 @@ exports.handler = function(event, context) {
   var response = {};
   var error = null;
   var child = spawn('venv/bin/python', [
-	  'lambda-function.py',
-	  JSON.stringify(event, null, 2)
-		]);
+    'lambda-function.py',
+    JSON.stringify(event, null, 2)
+    ]);
   child.stdout.on('data', function (data) {
     console.log("stdout:\n"+data);
     response = JSON.parse(data);
@@ -240,10 +242,15 @@ $ curl -X POST -d '{"name": "Clint"}' https://hostname/test/greeting
 <section>
 	<div data-markdown>
 	## Conclusions
-	* no EC2 instance, no server maintenance
-	* FREE - first million requests per month
-	* then $0.20 per 1 million requests
-	* great for a __micro-service__ - simple endpoint, reacting to an event
+
+	* it's __cheap__
+	 * FREE - first million requests per month
+	 * then $0.20 per 1 million requests
+	* minimal deployment hassle
+	 * no EC2 instance, no server maintenance
+	* great for a __micro-service__
+	 * simple endpoint
+	 * reacting to an event
 	* terrible for a Django app
 	</div>
 	<aside class="notes" data-markdown>

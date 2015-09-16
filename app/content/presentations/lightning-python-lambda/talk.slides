@@ -91,7 +91,7 @@ author: James Mitchell
 <section>
 	<section>
 		<div data-markdown>
-		## 1 - Hello World in Python
+		## 1.1 - _Hello World_ in Python
 
 		* accept a JSON object from the wrapper, write JSON to stdout
 		* use virtualenv to bundle in python and extra libraries
@@ -114,6 +114,39 @@ if __name__=='__main__':
 		[sample code on Github](https://github.com/jtmitchell/lambda-function-wrapper)
 		</div>
 		<aside class="notes" data-markdown>
+		</aside>
+	</section>
+
+  <section>
+		<div data-markdown>
+		## 1.2 - Virtualenv
+
+		We need to create the virtualenv **inside** the project, so it can be included in the zipfile.
+		</div>
+		<pre><code data-trim>
+project folder
+  ├── lambda-function.py
+  ├── lambda-function-wrapper.js
+  ├── requirements.txt
+  └── venv
+      ├── bin
+...
+      │   ├── python -> python3.4
+      │   ├── python3 -> python3.4
+      │   └── python3.4
+      ├── include
+      │   └── python3.4m -> /usr/include/python3.4m
+      └── lib
+          └── python3.4
+              ├── abc.py -> /usr/lib/python3.4/abc.py
+              ├── base64.py -> /usr/lib/python3.4/base64.py
+              ├── bisect.py -> /usr/lib/python3.4/bisect.py
+...
+		</code></pre>
+		<aside class="notes" data-markdown>
+    * this is the magic part for Python
+    * make the virtualenv
+    * pip install all the required packages
 		</aside>
 	</section>
 </section>
@@ -157,10 +190,11 @@ exports.handler = function(event, context) {
 		<div data-markdown>
 		## 2.1 - Lambda Function
 
-		* upload a ZIP of the directory to S3 bucket
-		* ...this takes a while to upload 39Mb of Python
-		* make an IAM role for executing the function
-		* create the Lambda function
+* upload a ZIP of the directory to S3 bucket
+  * ```zip -r /tmp/hello-lambda.zip *```
+  * upload... this takes a while to upload 39Mb of Python
+* make an IAM role for executing the function
+* create the Lambda function
 
 		</div>
 		<pre><code class="shell" data-trim>
@@ -235,6 +269,7 @@ $ curl -X POST -d '{"name": "Clint"}' https://hostname/test/greeting
 		[![AWS API Gateway](images/aws-gateway-4-small.png)](images/aws-gateway-4.png)
 		</div>
 		<aside class="notes" data-markdown>
+    * and again again with **ipython notebook**
 		</aside>
 	</section>
 </section>

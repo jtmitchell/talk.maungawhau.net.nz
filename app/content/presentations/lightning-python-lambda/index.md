@@ -27,3 +27,4 @@ Python script.
 
  * [view the slides online](talk.html)
  * [download the PDF version](LambdaPython.pdf)
+ * [IPython Notebook with sample code calling the API](sample.ipynb)

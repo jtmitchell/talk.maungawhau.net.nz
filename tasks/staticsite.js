@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('underscore');
+// var _ = require('underscore');
 var argv = require('yargs').argv;
 var frontMatter = require('gulp-front-matter');
 var merge = require('merge-stream');
@@ -12,7 +12,7 @@ var marked = require('gulp-marked');
 var gulp = require('gulp');
 var path = require('path');
 var rename = require('gulp-rename');
-var gutil = require('gulp-util');
+// var gutil = require('gulp-util');
 
 var debug = require('gulp-debug');
 
@@ -26,7 +26,7 @@ var site = {
 	    'google_verify': 'ly8QgWAy0wwtyg5EoDAcuzhxRvsglDkNS740NVwHLco',
 	    'analytics_id': 'UA-62644260-2',
 	    'time': new Date()
-}
+};
 
 if (argv._.indexOf('serve:dist') > -1) {
 	site.url = 'http://localhost:9000';
@@ -40,11 +40,11 @@ swigExtras.useFilter(swig, 'truncate');
 
 function summarize(marker) {
     return through.obj(function (file, enc, cb) {
-        var summary = file.contents.toString().split(marker)[0]
-        file.page.summary = summary
-        this.push(file)
-        cb()
-    })
+        var summary = file.contents.toString().split(marker)[0];
+        file.page.summary = summary;
+        this.push(file);
+        cb();
+    });
 }
 
 
@@ -71,7 +71,11 @@ gulp.task('cleanpresentations', function () {
 gulp.task('presentations', ['cleanpresentations'], function () {
     var images = gulp.src(['app/content/presentations/**/*.jpg','app/content/presentations/**/*.png'])
     		.pipe(gulp.dest('dist'));
-    var extras = gulp.src(['app/content/presentations/**/*.pdf','app/content/presentations/**/*.txt'])
+    var extras = gulp.src([
+						'app/content/presentations/**/*.pdf',
+						'app/content/presentations/**/*.ipynb',
+						'app/content/presentations/**/*.zip',
+						'app/content/presentations/**/*.txt'])
     		.pipe(gulp.dest('dist'));
 		var slides = gulp.src('app/content/presentations/**/*.slides')
 				.pipe(frontMatter({property: 'page', remove: true}))
@@ -110,7 +114,7 @@ gulp.task('presentations', ['cleanpresentations'], function () {
                 site.presentations = presentations;
                 site.tags = tags;
                 cb();
-            })
+            });
         })())
         .pipe(applyTemplate('app/assets/templates/presentation.html'))
         .pipe(gulp.dest('dist'));
@@ -154,11 +158,11 @@ gulp.task('rss', ['presentations'], function () {
             var data = {
                 site: site,
                 page: {}
-            }
-            var tpl = swig.compileFile(file.path)
-            file.contents = new Buffer(tpl(data), 'utf8')
-            this.push(file)
-            cb()
+            };
+            var tpl = swig.compileFile(file.path);
+            file.contents = new Buffer(tpl(data), 'utf8');
+            this.push(file);
+            cb();
         }))
         .pipe(gulp.dest('dist'));
 });
@@ -169,11 +173,11 @@ gulp.task('sitemap', ['presentations', 'pages'], function () {
             var data = {
                 site: site,
                 page: {}
-            }
-            var tpl = swig.compileFile(file.path)
-            file.contents = new Buffer(tpl(data), 'utf8')
-            this.push(file)
-            cb()
+            };
+            var tpl = swig.compileFile(file.path);
+            file.contents = new Buffer(tpl(data), 'utf8');
+            this.push(file);
+            cb();
         }))
         .pipe(gulp.dest('dist'));
 });

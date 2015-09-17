@@ -23,6 +23,8 @@ Lambda is a compelling option for deploying endpoints for REST-based micro-servi
 This lightning talk demonstrates how to use a Node.js wrapper to execute a
 Python script.
 
+Video of this talk from the [Auckland Python Users Group](http://www.meetup.com/NZPUG-Auckland/) is [available on YouTube](https://youtu.be/aQjLaG5WdCg).
+
 [![Python and Lambda](images/title.png)](talk.html)
 
  * [view the slides online](talk.html)

@@ -50,7 +50,19 @@
 {%- endblock %}
 
 {% block javascript %}
+<script src="/scripts/jquery-1.7.1.js"></script>
 {% if page.comments %}
 <script src="https://apis.google.com/js/plusone.js"></script>
+{% endif %}
+{% if site.analytics_id %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $('.social-share a').each(function(idx, elem){
+    	$(elem).on('click', function(){
+        ga('send', 'event', 'social-share', 'click', elem.title, {'nonInteraction': 1});    		
+    	});
+    });
+});
+</script>
 {% endif %}
 {% endblock %}
